@@ -8,3 +8,4 @@
 
 ![消息重复消费](./mq_question_repeat.png)
 
+![消息丢失](./mq_question_lose.png)
