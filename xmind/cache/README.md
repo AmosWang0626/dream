@@ -24,6 +24,10 @@
 
 ![6_Redis哨兵](./6_Redis哨兵.png)
 
+## 7、Redis哨兵主备切换数据丢失问题
+
+![7_Redis哨兵主备切换数据丢失问题](./7_Redis哨兵主备切换数据丢失问题.png)
+
 ## n、Redis VS Memcached
 
 ![redis vs memcached](./redis_vs_memcached.png)
