@@ -12,6 +12,14 @@
 
 ![3_Redis过期淘汰策略](./3_Redis过期淘汰策略.png)
 
+## 4、Redis主从复制
+
+![4_Redis主从复制](./4_Redis主从复制.png)
+
+## 5、Redis主从复制深入剖析
+
+![5_Redis主从复制深入剖析](./5_Redis主从复制深入剖析.png)
+
 ## n、Redis VS Memcached
 
 ![redis vs memcached](./redis_vs_memcached.png)
