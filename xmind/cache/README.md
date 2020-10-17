@@ -20,6 +20,10 @@
 
 ![5_Redis主从复制深入剖析](./5_Redis主从复制深入剖析.png)
 
+## 6、Redis哨兵
+
+![6_Redis哨兵](./6_Redis哨兵.png)
+
 ## n、Redis VS Memcached
 
 ![redis vs memcached](./redis_vs_memcached.png)
