@@ -28,6 +28,10 @@
 
 ![7_Redis哨兵主备切换数据丢失问题](./7_Redis哨兵主备切换数据丢失问题.png)
 
+## 8、Redis哨兵底层原理与选举算法
+
+![8_Redis哨兵底层原理与选举算法](./8_Redis哨兵底层原理与选举算法.png)
+
 ## n、Redis VS Memcached
 
 ![redis vs memcached](./redis_vs_memcached.png)
