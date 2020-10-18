@@ -32,6 +32,10 @@
 
 ![8_Redis哨兵底层原理与选举算法](./8_Redis哨兵底层原理与选举算法.png)
 
+## 9、Redis持久化机制对比
+
+![9_Redis持久化机制对比](./9_Redis持久化机制对比.png)
+
 ## n、Redis VS Memcached
 
 ![redis vs memcached](./redis_vs_memcached.png)
