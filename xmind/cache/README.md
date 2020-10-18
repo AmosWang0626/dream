@@ -36,6 +36,10 @@
 
 ![9_Redis持久化机制对比](./09_Redis持久化机制对比.png)
 
+## 10、Redis集群模式
+
+![10_Redis集群模式](./10_Redis集群模式.png)
+
 ## n、Redis VS Memcached
 
 ![redis vs memcached](./redis_vs_memcached.png)
