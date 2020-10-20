@@ -40,6 +40,10 @@
 
 ![10_Redis集群模式](./10_Redis集群模式.png)
 
+## 12、Redis缓存雪崩穿透击穿
+
+![12_Redis缓存雪崩穿透击穿](./12_Redis缓存雪崩穿透击穿.png)
+
 ## n、Redis VS Memcached
 
 ![redis vs memcached](./redis_vs_memcached.png)
