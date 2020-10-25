@@ -46,6 +46,10 @@ Cache Aside Pattern
 
 ![10_Redis集群模式](./10_Redis集群模式.png)
 
+## 11、Redis集群核心原理
+
+![11_Redis集群核心原理](./11_Redis集群核心原理.png)
+
 ## 12、Redis缓存雪崩穿透击穿
 
 ![12_Redis缓存雪崩穿透击穿](./12_Redis缓存雪崩穿透击穿.png)
