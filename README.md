@@ -8,6 +8,10 @@
 
 ![Dream](./xmind/dream/dream.png)
 
+目前处于初级和中级之间，争取2021年完全满足中级，向高级迈进，加油！
+
+![Dream](./xmind/dream/AMOS职业规划.png)
+
 # 知识点
 
 - [mq](./xmind/mq/README.md)
