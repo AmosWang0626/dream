@@ -1,10 +1,3 @@
----
-title: 面试突击 HashMap 篇（更新中...） date: 2021-03-05 categories: 面试突击 tags:
-
-- 面试突击
-
----
-
 # 面试突击 HashMap 篇
 
 ## 前置关键词
@@ -103,3 +96,35 @@ public class HashMap<K, V> {
 }
 ```
 
+## JDK 1.7 并发扩容死循环问题
+
+```java
+public class HashMap<K, V> extends AbstractMap<K, V> implements Map<K, V>, Cloneable, Serializable {
+    /**
+     * Transfers all entries from current table to newTable.
+     */
+    void transfer(Entry[] newTable, boolean rehash) {
+        int newCapacity = newTable.length;
+        for (Entry<K, V> e : table) {
+            while (null != e) {
+                Entry<K, V> next = e.next;
+                if (rehash) {
+                    e.hash = null == e.key ? 0 : hash(e.key);
+                }
+                int i = indexFor(e.hash, newCapacity);
+                e.next = newTable[i];
+                newTable[i] = e;
+                e = next;
+            }
+        }
+    }
+}
+```
+
+有点强迫症，看着 while 里的代码，总觉得有点理解不了，就写了个demo测了一下，这就是个典型的头插法，没有特殊含义。
+
+多线程下死循环是怎么产生的呢？
+
+Thread1：
+
+Thread2：
