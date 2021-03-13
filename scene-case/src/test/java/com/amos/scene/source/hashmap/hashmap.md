@@ -125,24 +125,20 @@ public class HashMap<K, V> {
 
 有点强迫症，看着 while 里的代码，总觉得有点理解不了，就写了个demo测了一下，这就是个典型的头插法，没有特殊含义。
 
-```java
-while (null != e) {
-    Node next = e.next;
+![HashMap头插法](hashmap-head-insert.png)
 
-    e.next = table[i];
-    table[i] = e;
-    e = next;
-}
-```
+死循环的原因，详细看上边那篇博客即可。下边简单概述一下：
 
-```text
-假设有三个节点：3 > 7 > 11
+首先，看这段代码，并发情况下，出现问题的肯定是共享变量，newTable就可以排除了，每次进来的newTable都是扩容后的、全新的数组。
 
-首次进入循环，e = 3，next = 7，此时 table[i] 为空，e.next = null，table[i] = 3{key=3, next=null}；最后：e = 7
+然后，死循环的原因，就定位在table中的Entry上，Entry也就是链表，只要链表中的两个Entry.next互相引用就会导致查询的时候死循环。
 
-下一次循环，e = 7，next = 11，e.next = table[i] = 3，table[i] = 7{key=7, next=3}；最后：e = 11
+概括一下，两个线程同时扩容：
 
-下一次循环，e = 11，next = null，e.next = table[i] = 11，table[i] = 11{key=11, next=7}；最后e = null
-
-结束循环，头插法完成：11 > 7 > 3
-```
+- 线程1：扩容时，执行 `Entry<K, V> next = e.next;` 之后挂起，此时 e = 3，next = 7
+- 线程2：一个扩容完成，顺序是 11 > 7 > 3
+- 线程1：继续执行，
+    - while第一次，e = 3，next = 7；e.next = table[i] = null，`最后3上位`
+    - while第二次，e = 7，此时7的next不是11，而是线程2扩容完成后的3，next = 3；e.next = table[i] = 3，`最后7上位`【7.next = 3】
+    - while第三次，e = 3，此时next = null，e.next = table[i] = 7，`最后3上位`，while循环结束【3.next = 7】
+    - 死循环形成【7.next = 3，3.next = 7】，后续如果查询11时，3和7死循环，CPU就100%了。
