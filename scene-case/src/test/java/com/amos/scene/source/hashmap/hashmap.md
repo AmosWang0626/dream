@@ -98,8 +98,10 @@ public class HashMap<K, V> {
 
 ## JDK 1.7 并发扩容死循环问题
 
+> [老生常谈，HashMap的死循环-占小狼](https://www.jianshu.com/p/1e9cf0ac07f4)
+
 ```java
-public class HashMap<K, V> extends AbstractMap<K, V> implements Map<K, V>, Cloneable, Serializable {
+public class HashMap<K, V> {
     /**
      * Transfers all entries from current table to newTable.
      */
@@ -123,8 +125,24 @@ public class HashMap<K, V> extends AbstractMap<K, V> implements Map<K, V>, Clone
 
 有点强迫症，看着 while 里的代码，总觉得有点理解不了，就写了个demo测了一下，这就是个典型的头插法，没有特殊含义。
 
-多线程下死循环是怎么产生的呢？
+```java
+while (null != e) {
+    Node next = e.next;
 
-Thread1：
+    e.next = table[i];
+    table[i] = e;
+    e = next;
+}
+```
 
-Thread2：
+```text
+假设有三个节点：3 > 7 > 11
+
+首次进入循环，e = 3，next = 7，此时 table[i] 为空，e.next = null，table[i] = 3{key=3, next=null}；最后：e = 7
+
+下一次循环，e = 7，next = 11，e.next = table[i] = 3，table[i] = 7{key=7, next=3}；最后：e = 11
+
+下一次循环，e = 11，next = null，e.next = table[i] = 11，table[i] = 11{key=11, next=7}；最后e = null
+
+结束循环，头插法完成：11 > 7 > 3
+```
