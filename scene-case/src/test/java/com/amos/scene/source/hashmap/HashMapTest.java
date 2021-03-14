@@ -3,6 +3,7 @@ package com.amos.scene.source.hashmap;
 import org.junit.jupiter.api.Test;
 
 import java.util.HashMap;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * HashMapTest
@@ -16,8 +17,18 @@ public class HashMapTest {
     public void testResize() {
         // 注意JDK版本，不同版本resize时机可能不一
         // 1.7 是在put时，先判断size，然后扩容的
-        // 11 是在put完成之后，判断size进行扩容的
+        // 1.8 是在put完成之后，判断size进行扩容的
         HashMap<Integer, String> hashMap = new HashMap<>(2);
+        hashMap.put(3, "amos");
+        hashMap.put(7, "amos");
+        hashMap.put(11, "amos");
+
+        System.out.println(hashMap);
+    }
+
+    @Test
+    public void concurrent() {
+        ConcurrentHashMap<Integer, String> hashMap = new ConcurrentHashMap<>();
         hashMap.put(3, "amos");
         hashMap.put(7, "amos");
         hashMap.put(11, "amos");
