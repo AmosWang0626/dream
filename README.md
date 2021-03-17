@@ -12,6 +12,10 @@
 
 ![Dream](./xmind/dream/AMOS职业规划.png)
 
+现实点，技术路线
+
+![Dream](./xmind/dream/AMOS技术路线.png)
+
 # 知识点
 
 - [mq](./xmind/mq/README.md)
