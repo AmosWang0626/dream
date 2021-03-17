@@ -16,11 +16,15 @@ import java.util.Objects;
  */
 public class HashSetTest {
 
+    /**
+     * 底层为HashMap，所以同样存在线程不安全的问题
+     */
     @Test
     void hashTest() {
         Person person = new Person().setName("hello").setAge(16);
         Person person2 = new Person().setName("hello").setAge(16);
 
+        // 既然底层是HashMap，那肯定是有Value的，value是个 private static final Object PRESENT = new Object();
         HashSet<Person> hashSet = new HashSet<>();
         hashSet.add(person);
         hashSet.add(person2);
@@ -31,6 +35,7 @@ public class HashSetTest {
 
         // foreach
         System.out.println();
+        // forEachRemaining，其中 Remaining 表示剩余的，iterator遍历一个少一个，遍历完，再想遍历就没了
         hashSet.spliterator().forEachRemaining(s -> System.out.print(s + "\t"));
         System.out.println();
     }
