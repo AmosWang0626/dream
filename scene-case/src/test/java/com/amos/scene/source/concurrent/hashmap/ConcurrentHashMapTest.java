@@ -29,6 +29,24 @@ public class ConcurrentHashMapTest {
     }
 
     @Test
+    public void testAdd() {
+        int retries = -1;
+        int RETRIES_BEFORE_LOCK = 2;
+        int comeIn = 0;
+
+        for (; ; ) {
+            // retries 第一次0，第二次1，第三次2，等于2就要加锁了
+            if (retries++ == RETRIES_BEFORE_LOCK) {
+                System.out.println("lock");
+                break;
+            }
+            System.out.println("for... " + comeIn++);
+        }
+
+        System.out.println("Finish");
+    }
+
+    @Test
     public void segment() {
         Segment<Integer, String> map = new Segment<>();
 

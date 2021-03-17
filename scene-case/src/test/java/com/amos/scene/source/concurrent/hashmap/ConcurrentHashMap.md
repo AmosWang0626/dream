@@ -72,6 +72,53 @@ static final class Segment<K, V> extends ReentrantLock implements Serializable {
 
 put操作时，通过两次hash定位HashEntry位置，第一次找到在第几个Segment，第二次找到在Segment中table中的位置。
 
-##### 1.7 计算size
+##### 1.7 计算 size（初见，挺有趣）
 
-TODO 比较有意思
+```java
+public class ConcurrentHashMap<K, V> extends AbstractMap<K, V> implements ConcurrentMap<K, V>, Serializable {
+    public int size() {
+        // Try a few times to get accurate count. On failure due to
+        // continuous async changes in table, resort to locking.
+        final Segment<K, V>[] segments = this.segments;
+        int size;
+        boolean overflow; // true if size overflows 32 bits
+        long sum;         // sum of modCounts
+        long last = 0L;   // previous sum
+        int retries = -1; // first iteration isn't retry
+        try {
+            // 这个for循环至少会执行两次吧，除非sum始终为0，也就是空的Map
+            for (; ; ) {
+                // retries++ 第一次-1，第二次0，第三次1，第四次2（此时就要加锁了，if执行完retries = 3）
+                if (retries++ == RETRIES_BEFORE_LOCK) {
+                    for (int j = 0; j < segments.length; ++j)
+                        ensureSegment(j).lock(); // force creation
+                }
+                sum = 0L;
+                size = 0;
+                overflow = false;
+                for (int j = 0; j < segments.length; ++j) {
+                    Segment<K, V> seg = segmentAt(segments, j);
+                    if (seg != null) {
+                        // seg.modCount 是只加不减的
+                        sum += seg.modCount;
+                        int c = seg.count;
+                        if (c < 0 || (size += c) < 0)
+                            overflow = true;
+                    }
+                }
+                // 初见，是不是想last在哪赋值了，在下边。下次循环才能用到，既然是比较，至少也得两两对比吧，for循环至少执行两次
+                if (sum == last)
+                    break;
+                last = sum;
+            }
+        } finally {
+            // 解锁
+            if (retries > RETRIES_BEFORE_LOCK) {
+                for (int j = 0; j < segments.length; ++j)
+                    segmentAt(segments, j).unlock();
+            }
+        }
+        return overflow ? Integer.MAX_VALUE : size;
+    }
+}
+```
