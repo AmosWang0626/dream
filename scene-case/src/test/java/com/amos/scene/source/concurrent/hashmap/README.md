@@ -13,11 +13,13 @@
 
 并发情况下，HashMap 存在线程不安全的情况，线程不安全，当然要加锁了。
 
-##### 加锁示例1
+##### HashTable
 
 HashTable，get和put都加了synchronized修饰，这样带来的直接问题就是，性能比较差。
 
-##### 1.7 分段锁
+## JDK 1.7
+
+### 1.7 分段锁
 
 采用分段的思想，切分为多个Segment，默认为16个，可以初始化时指定，后期不能修改，Segment就相当于一个小的HashMap。
 
@@ -25,7 +27,7 @@ HashTable，get和put都加了synchronized修饰，这样带来的直接问题�
 
 扩容时，也是每个Segment里边的table自己扩容，Segment数量如前边所说，初始化时指定，不可更改。
 
-##### 1.7 使用分段锁 get/put
+### 1.7 使用分段锁 get/put
 
 类似HashMap，只不过一个由一个数组，换成了一组数组，每个Segment中有一个数组，看下边源码。
 
@@ -72,7 +74,7 @@ static final class Segment<K, V> extends ReentrantLock implements Serializable {
 
 put操作时，通过两次hash定位HashEntry位置，第一次找到在第几个Segment，第二次找到在Segment中table中的位置。
 
-##### 1.7 计算 size（初见，挺有趣）
+### 1.7 计算 size（初见，挺有趣）
 
 ```java
 public class ConcurrentHashMap<K, V> extends AbstractMap<K, V> implements ConcurrentMap<K, V>, Serializable {
@@ -119,6 +121,99 @@ public class ConcurrentHashMap<K, V> extends AbstractMap<K, V> implements Concur
             }
         }
         return overflow ? Integer.MAX_VALUE : size;
+    }
+}
+```
+
+## JDK 1.8
+
+锁粒度细化，为每个Node，CAS + synchronized
+
+和 HashMap 一样，只不过在 put 的时候，如果多个线程操作同一个 Node，会先加锁再操作，开始为 CAS，如果有冲突，再升级为 synchronized。
+
+JDK1.6之后，synchronized做过优化，会有锁升级的过程，无锁、偏向锁、轻量级锁、重量级锁，以此来保证并发安全。
+
+```java
+ static class Node<K, V> implements Map.Entry<K, V> {
+    final int hash;
+    final K key;
+    volatile V val;
+    volatile Node<K, V> next;
+}
+```
+
+```java
+public class ConcurrentHashMap<K, V> extends AbstractMap<K, V> implements ConcurrentMap<K, V>, Serializable {
+
+    final V putVal(K key, V value, boolean onlyIfAbsent) {
+        if (key == null || value == null) throw new NullPointerException();
+        int hash = spread(key.hashCode());
+        int binCount = 0;
+        for (Node<K, V>[] tab = table; ; ) {
+            Node<K, V> f;
+            int n, i, fh;
+            K fk;
+            V fv;
+            if (tab == null || (n = tab.length) == 0)
+                tab = initTable();
+            else if ((f = tabAt(tab, i = (n - 1) & hash)) == null) {
+                // CAS 操作
+                if (casTabAt(tab, i, null, new Node<K, V>(hash, key, value)))
+                    break;                   // no lock when adding to empty bin
+            } else if ((fh = f.hash) == MOVED)
+                tab = helpTransfer(tab, f);
+            else if (onlyIfAbsent // check first node without acquiring lock
+                    && fh == hash
+                    && ((fk = f.key) == key || (fk != null && key.equals(fk)))
+                    && (fv = f.val) != null)
+                return fv;
+            else {
+                V oldVal = null;
+                // synchronized 加锁操作
+                synchronized (f) {
+                    if (tabAt(tab, i) == f) {
+                        if (fh >= 0) {
+                            binCount = 1;
+                            for (Node<K, V> e = f; ; ++binCount) {
+                                K ek;
+                                if (e.hash == hash &&
+                                        ((ek = e.key) == key ||
+                                                (ek != null && key.equals(ek)))) {
+                                    oldVal = e.val;
+                                    if (!onlyIfAbsent)
+                                        e.val = value;
+                                    break;
+                                }
+                                Node<K, V> pred = e;
+                                if ((e = e.next) == null) {
+                                    pred.next = new Node<K, V>(hash, key, value);
+                                    break;
+                                }
+                            }
+                        } else if (f instanceof TreeBin) {
+                            Node<K, V> p;
+                            binCount = 2;
+                            if ((p = ((TreeBin<K, V>) f).putTreeVal(hash, key,
+                                    value)) != null) {
+                                oldVal = p.val;
+                                if (!onlyIfAbsent)
+                                    p.val = value;
+                            }
+                        } else if (f instanceof ReservationNode)
+                            throw new IllegalStateException("Recursive update");
+                    }
+                }
+                if (binCount != 0) {
+                    if (binCount >= TREEIFY_THRESHOLD)
+                        treeifyBin(tab, i);
+                    if (oldVal != null)
+                        return oldVal;
+                    break;
+                }
+            }
+        }
+        addCount(1L, binCount);
+        return null;
     }
 }
 ```
