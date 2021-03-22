@@ -55,4 +55,83 @@ public class SyncTest {
         System.out.println(GraphLayout.parseInstance(name).totalSize());
     }
 
+    /**
+     * 数组的对象头真的会多出来一个数组长度
+     */
+    @Test
+    public void arrayObjectSize() {
+        String[] names = {"11", "2", "33", "4", "55"};
+        System.out.println("GraphLayout: " + GraphLayout.parseInstance(names).toPrintable());
+        System.out.println("对象总大小: " + GraphLayout.parseInstance(names).totalSize());
+        System.out.println("ClassLayout: " + ClassLayout.parseInstance(names).toPrintable());
+    }
+
+    @Test
+    public void biasedLock0() {
+        // 05 00 00 00 (00000101 00000000 00000000 00000000) (5)
+        // 震惊，jdk-11.0.2，跑起来就是可偏向，但没有偏向于任何线程
+        String name = "local test";
+
+        System.out.println("ClassLayout: " + ClassLayout.parseInstance(name).toPrintable());
+    }
+
+    @Test
+    public void biasedLock() {
+        String name = "local test";
+
+        synchronized (name) {
+            // 就这就偏向主线程了
+            // 05 b0 f5 b1 (00000101 10110000 11110101 10110001) (-1309298683)
+            System.out.println("ClassLayout: " + ClassLayout.parseInstance(name).toPrintable());
+        }
+    }
+
+    @Test
+    public void lightWeightLock() throws InterruptedException {
+        String name = "local test";
+
+        Thread thread = new Thread(() -> {
+            synchronized (name) {
+                // 偏向锁
+                // 05 78 b0 a6 (00000101 01111000 10110000 10100110) (-1498384379)
+                System.out.println("thread lock!: " + ClassLayout.parseInstance(name).toPrintable());
+            }
+        });
+        thread.start();
+        thread.join();
+
+        synchronized (name) {
+            // 轻量级锁
+            // 98 c5 2f c5 (10011000 11000101 00101111 11000101) (-986724968)
+            System.out.println("main lock!: " + ClassLayout.parseInstance(name).toPrintable());
+        }
+    }
+
+    @Test
+    public void heavyWeightLock() throws InterruptedException {
+        String name = "local test";
+
+        Thread thread1 = new Thread(() -> {
+            synchronized (name) {
+                // 重量级锁
+                // 02 16 90 b1 (00000010 00010110 10010000 10110001) (-1315957246)
+                System.out.println("thread-1 lock!: " + ClassLayout.parseInstance(name).toPrintable());
+            }
+        });
+
+        Thread thread2 = new Thread(() -> {
+            synchronized (name) {
+                // 重量级锁
+                // 02 16 90 b1 (00000010 00010110 10010000 10110001) (-1315957246)
+                System.out.println("thread-2 lock!: " + ClassLayout.parseInstance(name).toPrintable());
+            }
+        });
+
+        thread1.start();
+        thread2.start();
+
+        thread1.join();
+        thread2.join();
+    }
+
 }
