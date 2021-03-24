@@ -1,4 +1,4 @@
-package com.amos.scene.source.concurrent.thread.pool;
+package com.amos.scene.pool;
 
 import org.junit.jupiter.api.Test;
 
