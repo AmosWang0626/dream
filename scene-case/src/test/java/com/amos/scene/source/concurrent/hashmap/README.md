@@ -157,7 +157,7 @@ public class ConcurrentHashMap<K, V> extends AbstractMap<K, V> implements Concur
             if (tab == null || (n = tab.length) == 0)
                 tab = initTable();
             else if ((f = tabAt(tab, i = (n - 1) & hash)) == null) {
-                // CAS 操作
+                // CAS 操作（注意：仅在table中头结点为null时使用CAS，也就是没发生Hash冲突的时候）
                 if (casTabAt(tab, i, null, new Node<K, V>(hash, key, value)))
                     break;                   // no lock when adding to empty bin
             } else if ((fh = f.hash) == MOVED)
@@ -169,7 +169,7 @@ public class ConcurrentHashMap<K, V> extends AbstractMap<K, V> implements Concur
                 return fv;
             else {
                 V oldVal = null;
-                // synchronized 加锁操作
+                // synchronized 加锁操作（f 肯定不为空了）
                 synchronized (f) {
                     if (tabAt(tab, i) == f) {
                         if (fh >= 0) {
