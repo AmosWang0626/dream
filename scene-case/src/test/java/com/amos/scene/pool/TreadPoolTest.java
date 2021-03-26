@@ -17,14 +17,6 @@ public class TreadPoolTest {
 
     private static final int NCPU = Runtime.getRuntime().availableProcessors();
 
-    /**
-     * 拒绝策略
-     * <p>
-     * 1. CallerRunsPolicy 不抛弃不放弃(重试直至执行成功)
-     * 2. AbortPolicy 拒绝任务并且抛出异常
-     * 3. DiscardPolicy 拒绝任务不抛出异常
-     * 4. DiscardOldestPolicy 喜新厌旧(抛弃队列里面等待最久的一个线程，然后把拒绝任务加到队列)
-     */
     public static void main(String[] args) {
         ThreadFactory factory = new ThreadFactoryBuilder().setNameFormat("io-thread-%d").build();
         ThreadPoolExecutor ioExecutor = new ThreadPoolExecutor(
