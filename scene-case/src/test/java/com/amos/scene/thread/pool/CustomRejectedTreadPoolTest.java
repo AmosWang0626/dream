@@ -1,6 +1,4 @@
-package com.amos.scene.pool;
-
-import com.google.common.util.concurrent.ThreadFactoryBuilder;
+package com.amos.scene.thread.pool;
 
 import java.util.Arrays;
 import java.util.concurrent.*;

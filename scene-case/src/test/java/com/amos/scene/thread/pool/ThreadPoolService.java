@@ -1,4 +1,4 @@
-package com.amos.scene.pool;
+package com.amos.scene.thread.pool;
 
 
 import com.alibaba.ttl.threadpool.TtlExecutors;

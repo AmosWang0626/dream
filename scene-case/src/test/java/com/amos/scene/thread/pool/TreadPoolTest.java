@@ -1,6 +1,4 @@
-package com.amos.scene.pool;
-
-import com.google.common.util.concurrent.ThreadFactoryBuilder;
+package com.amos.scene.thread.pool;
 
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadFactory;
@@ -18,18 +16,23 @@ public class TreadPoolTest {
     private static final int NCPU = Runtime.getRuntime().availableProcessors();
 
     public static void main(String[] args) {
-        ThreadFactory factory = new ThreadFactoryBuilder().setNameFormat("io-thread-%d").build();
+        int corePoolSize = NCPU;
+        int maxPoolSize = 2 * NCPU;
+        int queueCapacity = 200;
+
+        ThreadFactory factory = new ThreadFactoryBuilder().setNameFormat("io-线程-%d").build();
         ThreadPoolExecutor ioExecutor = new ThreadPoolExecutor(
-                NCPU, 2 * NCPU, 60, TimeUnit.SECONDS,
-                new LinkedBlockingQueue<>(200), factory,
+                corePoolSize, maxPoolSize, 60, TimeUnit.SECONDS,
+                new LinkedBlockingQueue<>(queueCapacity), factory,
                 new ThreadPoolExecutor.CallerRunsPolicy());
 
-        System.out.printf("核心线程数 [%d], 最大线程数 [%d]\n", NCPU, NCPU * 2);
+        System.out.printf("核心线程数 [%d], 最大线程数 [%d], 任务队列容量 [%d]\n", corePoolSize, maxPoolSize, queueCapacity);
+        System.out.println(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
 
         for (int i = 0; i < 100; i++) {
             final int num = i;
             ioExecutor.execute(() -> {
-                System.out.println(Thread.currentThread().getId() + " 处理任务ID [" + num + "]>>> AMOS 测试! ");
+                System.out.println(Thread.currentThread().getName() + " 处理任务ID [" + num + "]>>> AMOS 测试! ");
 
                 try {
                     TimeUnit.SECONDS.sleep(1);
@@ -39,6 +42,7 @@ public class TreadPoolTest {
             });
         }
 
+        ioExecutor.shutdown();
     }
 
 }
