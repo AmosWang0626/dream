@@ -39,11 +39,7 @@ public class UnsafeTest {
                 theUnsafe.setAccessible(true);
                 Unsafe unsafe = (Unsafe) theUnsafe.get(null);
 
-                while (true) {
-                    // state == 100的话，可能只能有一个线程 break
-                    if (state >= 100) {
-                        break;
-                    }
+                while (state < 100) {
 
                     long offset = unsafe.objectFieldOffset(MyObject.class.getDeclaredField("state"));
                     int toState = state + 1;

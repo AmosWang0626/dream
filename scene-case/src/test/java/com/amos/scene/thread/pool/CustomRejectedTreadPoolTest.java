@@ -1,6 +1,9 @@
 package com.amos.scene.thread.pool;
 
-import java.util.Arrays;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.experimental.Accessors;
+
 import java.util.concurrent.*;
 
 /**
@@ -28,8 +31,7 @@ public class CustomRejectedTreadPoolTest {
         // ThreadPoolExecutor.CallerRunsPolicy callerRunsPolicy = new ThreadPoolExecutor.CallerRunsPolicy();
 
         RejectedExecutionHandler customRejectedPolicy = (r, executor) ->
-                System.out.printf("触发自定义拒绝策略! 参数: %s\n",
-                        r instanceof MyRunnable<?> ? Arrays.toString(((MyRunnable<?>) r).params) : null);
+                System.out.printf("触发自定义拒绝策略! 参数: %s\n", r instanceof MyRunnable ? ((MyRunnable) r).customParam : null);
 
         ThreadFactory factory = new ThreadFactoryBuilder().setNameFormat("io-thread-%d").build();
         ThreadPoolExecutor ioExecutor = new ThreadPoolExecutor(
@@ -41,27 +43,45 @@ public class CustomRejectedTreadPoolTest {
         System.out.println(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
 
         for (int i = 0; i < 10; i++) {
-            ioExecutor.execute(new MyRunnable<>(i));
+            ioExecutor.execute(new MyRunnable(new CustomParam().setId("custom_id_" + i)));
         }
 
         ioExecutor.shutdown();
     }
 
+    @Getter
+    @Setter
+    @Accessors(chain = true)
+    private static class CustomParam {
+
+        private String id;
+
+        private String name;
+
+        @Override
+        public String toString() {
+            return "CustomParam{" +
+                    "id='" + id + '\'' +
+                    ", name='" + name + '\'' +
+                    '}';
+        }
+    }
+
+
     /**
      * 自定义任务
      */
-    private static class MyRunnable<T> implements Runnable {
+    private static class MyRunnable implements Runnable {
 
-        private final T[] params;
+        private final CustomParam customParam;
 
-        @SafeVarargs
-        public MyRunnable(T... params) {
-            this.params = params;
+        public MyRunnable(CustomParam customParam) {
+            this.customParam = customParam;
         }
 
         @Override
         public void run() {
-            System.out.println(Thread.currentThread().getName() + " 处理任务ID [" + params[0] + "]>>> AMOS 测试! ");
+            System.out.println(Thread.currentThread().getName() + " 处理任务ID [" + customParam.getId() + "]>>> AMOS 测试! ");
 
             try {
                 TimeUnit.MILLISECONDS.sleep(500);
