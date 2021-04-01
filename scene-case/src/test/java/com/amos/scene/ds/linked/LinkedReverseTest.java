@@ -1,8 +1,5 @@
-package com.amos.scene.ds;
+package com.amos.scene.ds.linked;
 
-import lombok.Getter;
-import lombok.Setter;
-import lombok.experimental.Accessors;
 import org.junit.jupiter.api.Test;
 
 /**
@@ -70,19 +67,6 @@ public class LinkedReverseTest {
         n4.next = n5;
 
         return head;
-    }
-
-    @Getter
-    @Setter
-    @Accessors(chain = true)
-    private static class Node {
-        private Integer value;
-        private Node next;
-
-        @Override
-        public String toString() {
-            return "Node{" + "value=" + value + ", next=" + next + '}';
-        }
     }
 
 }
