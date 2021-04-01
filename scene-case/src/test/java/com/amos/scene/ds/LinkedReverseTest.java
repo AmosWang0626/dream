@@ -17,10 +17,12 @@ public class LinkedReverseTest {
     public void main() {
         Node head = initNodes();
         System.out.println(head);
-        
-        System.out.println(reverse(head));
-    }
 
+        System.out.println(reverse(head));
+
+        // 测试单个节点
+        System.out.println(reverse(new Node().setValue(123)));
+    }
 
     /**
      * 反转链表
@@ -31,19 +33,31 @@ public class LinkedReverseTest {
      * @return 新的头结点
      */
     private Node reverse(Node head) {
+        // 无需反转
+        if (head.next == null) {
+            return head;
+        }
+
+        Node newHead = new Node();
+
         Node curr = head;
-        Node next = curr.next;
-        // 清空原头结点next
-        curr.next = null;
+        Node next = head.next;
+
+        curr.next = newHead.next;
+        newHead.next = curr;
 
         while (next != null) {
             curr = next;
             next = next.next;
 
-            next.next = curr;
+            // 头插法
+            curr.next = newHead.next;
+            newHead.next = curr;
         }
 
-        return curr;
+        head = newHead.next;
+
+        return head;
     }
 
     /**
@@ -55,10 +69,13 @@ public class LinkedReverseTest {
         Node head = new Node().setValue(1);
         Node n2 = new Node().setValue(2);
         Node n3 = new Node().setValue(3);
+        Node n4 = new Node().setValue(4);
+        Node n5 = new Node().setValue(5);
 
-        n3.next = new Node().setValue(4);
-        n2.next = n3;
         head.next = n2;
+        n2.next = n3;
+        n3.next = n4;
+        n4.next = n5;
 
         return head;
     }
@@ -72,10 +89,7 @@ public class LinkedReverseTest {
 
         @Override
         public String toString() {
-            return "Node{" +
-                    "value=" + value +
-                    ", next=" + next +
-                    '}';
+            return "Node{" + "value=" + value + ", next=" + next + '}';
         }
     }
 
