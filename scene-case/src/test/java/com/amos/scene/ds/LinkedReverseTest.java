@@ -38,26 +38,18 @@ public class LinkedReverseTest {
             return head;
         }
 
-        Node newHead = new Node();
+        Node pre = null, curr = head, temp;
 
-        Node curr = head;
-        Node next = head.next;
+        while (curr != null) {
+            temp = curr.next;
 
-        curr.next = newHead.next;
-        newHead.next = curr;
+            curr.next = pre;
 
-        while (next != null) {
-            curr = next;
-            next = next.next;
-
-            // 头插法
-            curr.next = newHead.next;
-            newHead.next = curr;
+            pre = curr;
+            curr = temp;
         }
 
-        head = newHead.next;
-
-        return head;
+        return pre;
     }
 
     /**
