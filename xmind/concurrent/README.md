@@ -23,7 +23,36 @@ Compare And Set（或者 Compare And Swap）
 `sun.misc.Unsafe.getUnsafe().compareAndSwapObject()`
 
 ```java
-// TODO @see chaos，将 Unsafe 使用方法搞过来！
+public class UnsafeTest {
+
+    public void execute() {
+        try {
+            Field theUnsafe = Unsafe.class.getDeclaredField("theUnsafe");
+            theUnsafe.setAccessible(true);
+            Unsafe unsafe = (Unsafe) theUnsafe.get(null);
+
+            while (true) {
+                // state == 100的话，可能只能有一个线程 break
+                if (state >= 100) {
+                    break;
+                }
+
+                long offset = unsafe.objectFieldOffset(MyObject.class.getDeclaredField("state"));
+                int toState = state + 1;
+                boolean cas = unsafe.compareAndSwapInt(this, offset, state, toState);
+                if (cas) {
+                    System.out.println("CAS 竞争成功: " + toState);
+                } else {
+                    System.out.println("CAS 竞争失败，等待重试!");
+                }
+
+                TimeUnit.MILLISECONDS.sleep(500);
+            }
+        } catch (NoSuchFieldException | InterruptedException | IllegalAccessException e) {
+            e.printStackTrace();
+        }
+    }
+}
 ```
 
 ## AQS
