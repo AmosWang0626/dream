@@ -29,18 +29,23 @@ public class CrossLinkedTest {
         int linked1Length = 0;
         int linked2Length = 0;
 
-        Node temp = linked1;
-        while (temp != null) {
+        Node temp1 = linked1;
+        while (temp1 != null) {
             linked1Length++;
 
-            temp = temp.next;
+            temp1 = temp1.next;
         }
 
-        temp = linked2;
-        while (temp != null) {
+        Node temp2 = linked2;
+        while (temp2 != null) {
             linked2Length++;
 
-            temp = temp.next;
+            temp2 = temp2.next;
+        }
+
+        if (temp1.equals(temp2)) {
+
+            return;
         }
 
         System.out.printf("链表1长度 %d, 链表2长度 %d\n", linked1Length, linked2Length);
@@ -49,14 +54,13 @@ public class CrossLinkedTest {
         int subAbs = Math.abs(sub);
         System.out.println(sub + " <<<< >>>> " + subAbs);
 
-        Node temp1, temp2;
 
         if (sub == 0) {
             temp1 = linked1;
             temp2 = linked2;
             while (temp1.next != null) {
-                
-                
+
+
             }
             return;
         }
