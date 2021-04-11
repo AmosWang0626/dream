@@ -151,6 +151,82 @@ MyISAM数据文件和索引文件是分开的，所以索引文件里的data都�
 > 答：张三。事务120读取的时候，只能读到 创建事务ID <= 当前事务ID 的数据；InnoDB里边，
 > 如果有不同的事务修改同一行数据，此时每个事务都会创建一个数据行的快照再进行修改。
 
+## MySQL锁
+
+### （1）表锁、行锁
+
+#### 表锁
+
+在MyISAM引擎下，一般MyISAM会加表锁：
+
+- 执行查询时，会默认加个表共享锁，也就是表读锁，这个时候别人只能来查，不能写数据；
+- 写操作的时候，会给表加独占锁，也就是表写锁，别人不能读也不能写。
+
+在InnoDB引擎下：
+
+- 意向共享锁，就是加共享行锁的时候，必须先加这个共享表锁；
+- 意向排它锁，就是给某行加排它锁的时候，必须先给表加排它锁。
+
+注意：这个表锁，是InnoDB引擎自动加的，无需手动加锁。
+
+#### 行锁
+
+InnoDB的行锁有共享锁（S）和排它锁（X）两种。
+
+- 共享锁：多个事务可以加共享锁读同一行数据，但是别的事务不能写这行数据；
+- 排它锁：就是一个事务可以写这行数据，其他事务只能读，不能写。
+
+---
+
+- 自动加锁
+    - insert/update/delete操作会加行级排它锁。
+    - select，InnoDB不会加锁。因为InnoDB默认实现了可重复读，也就是MVCC机制，多个事务随便读，各自有快照。
+
+- 手动加锁
+    - 手动加共享锁：`select * from table where id = 1 lock in share mode`，然后其他事务就不能来修改这行数据了。
+    - 手动加排它锁：`select * from table where id = 1 for update`，然后其他事务修改会被hang住，慎用！
+
+### （2）悲观锁和乐观锁
+
+悲观锁：
+> 只能我自己来操作，别人都操作不了。
+
+`select * fromo table where id = 1 for update`
+
+乐观锁：
+> 通过版本控制，如果别人修改了，我就不修改了，或者重新获取新值，再进行修改。有点CAS的意思。
+
+```sql
+select id, username, version
+from table
+where id = 1;
+
+update table
+set username = 'New Name',
+    version  = #{old_version} + 1
+where id = 1
+  and version = #{old_version};
+```
+
+### （3）死锁
+
+多个事务竞争同一把锁，就会形成死锁。
+
+实战：
+> 死锁相对常见，如下
+
+1. 有些时候，调整事务隔离级别可以解决。
+    - 查看事务隔离级别 `SELECT @@tx_isolation;`
+    - 修改数据库默认事务隔离级别；代码中配置事务隔离级别；多租户下，连接池设置事务隔离级别
+2. 看下哪里死锁了
+    - `Lock wait timeout exceeded; try restarting transaction`
+    - 查看死锁SQL `select * from information_schema.innodb_trx;`
+
+## MySQL调优手段
+
+- 尽可能单表查询，加上索引，join相关的逻辑放在代码里边
+- explain对应SQL，看是否命中了索引，索引扫描了多少行
+
 ## 主键数据类型选型
 
 推荐使用自增ID，那么如果自增ID用完了怎么办？
