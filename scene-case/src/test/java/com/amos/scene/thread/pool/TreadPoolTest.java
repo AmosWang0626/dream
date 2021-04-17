@@ -26,6 +26,14 @@ public class TreadPoolTest {
                 new LinkedBlockingQueue<>(queueCapacity), factory,
                 new ThreadPoolExecutor.CallerRunsPolicy());
 
+        // 如果核心线程数没有慢，则创建一个核心线程
+        ioExecutor.prestartCoreThread();
+        // 初始化所有和核心线程
+        ioExecutor.prestartAllCoreThreads();
+
+        // 核心线程可回收
+        ioExecutor.allowCoreThreadTimeOut(true);
+
         System.out.printf("核心线程数 [%d], 最大线程数 [%d], 任务队列容量 [%d]\n", corePoolSize, maxPoolSize, queueCapacity);
         System.out.println(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
 
