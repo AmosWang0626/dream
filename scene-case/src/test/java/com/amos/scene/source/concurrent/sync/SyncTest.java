@@ -134,4 +134,24 @@ public class SyncTest {
         thread2.join();
     }
 
+    @Test
+    public void intSize() {
+        // 16字节，对象头12字节，
+        boolean b = true;
+        System.out.println("boolean b = true; " + GraphLayout.parseInstance(b).totalSize());
+        System.out.println("ClassLayout: " + ClassLayout.parseInstance(b).toPrintable());
+        System.out.println("GraphLayout: " + GraphLayout.parseInstance(b).toPrintable());
+
+        // 16字节，对象头12字节，
+        int i = Integer.MAX_VALUE;
+        System.out.println("int i = Integer.MAX_VALUE; " + GraphLayout.parseInstance(i).totalSize());
+        System.out.println("ClassLayout: " + ClassLayout.parseInstance(i).toPrintable());
+        System.out.println("GraphLayout: " + GraphLayout.parseInstance(i).toPrintable());
+
+        String name = "amos";
+        System.out.println("String name = \"amos\"; " + GraphLayout.parseInstance(name).totalSize());
+        System.out.println("ClassLayout: " + ClassLayout.parseInstance(name).toPrintable());
+        System.out.println("GraphLayout: " + GraphLayout.parseInstance(name).toPrintable());
+    }
+
 }
