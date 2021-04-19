@@ -134,6 +134,9 @@ public class SyncTest {
         thread2.join();
     }
 
+    /**
+     * 设置JVM参数：-XX:-UseCompressedOops -XX:-UseCompressedClassPointers
+     */
     @Test
     public void intSize() {
         // 16字节，对象头12字节，
