@@ -3,6 +3,7 @@ package com.amos.scene.source.concurrent.lock;
 import org.junit.jupiter.api.Test;
 
 import java.util.concurrent.ThreadLocalRandom;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReentrantLock;
 
 /**
@@ -13,20 +14,38 @@ import java.util.concurrent.locks.ReentrantLock;
  */
 public class TryLockTest {
 
+    private static int i = 0;
+
     @Test
     public void tryLock() {
         ReentrantLock lock = new ReentrantLock();
-        int i = 0;
-        while (lock.tryLock()) {
-            try {
-                System.out.println("············ >>> " + i);
-                if (++i >= 5) {
-                    break;
+        Runnable runnable = () -> {
+            while (lock.tryLock()) {
+                int temp = i;
+                try {
+                    System.out.println("············ " + Thread.currentThread().getName() + " >>> " + temp);
+//                    TimeUnit.MILLISECONDS.sleep(50);
+                    if (++temp >= 20) {
+                        break;
+                    }
+                } finally {
+                    lock.unlock();
+                    i = temp;
                 }
-            } finally {
-                lock.unlock();
             }
+        };
+
+        new Thread(runnable).start();
+        new Thread(runnable).start();
+        new Thread(runnable).start();
+        new Thread(runnable).start();
+
+        try {
+            TimeUnit.SECONDS.sleep(5);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
         }
+
         System.out.println("finish!");
     }
 

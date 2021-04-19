@@ -129,7 +129,7 @@ public class ConcurrentHashMap<K, V> extends AbstractMap<K, V> implements Concur
 
 锁粒度细化，为每个Node，CAS + synchronized
 
-和 HashMap 一样，只不过在 put 的时候，如果多个线程操作同一个 Node，会先加锁再操作，开始为 CAS，如果有冲突，再升级为 synchronized。
+和 HashMap 一样，只不过在 put 的时候，如果多个线程操作同一个 数组中的位置，如果该位置为空，会 CAS 加锁处理；不为空，会使用 synchronized。
 
 JDK1.6之后，synchronized做过优化，会有锁升级的过程，无锁、偏向锁、轻量级锁、重量级锁，以此来保证并发安全。
 

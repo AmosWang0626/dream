@@ -44,11 +44,12 @@ public class UnsafeTest {
                     long offset = unsafe.objectFieldOffset(MyObject.class.getDeclaredField("state"));
                     int toState = state + 1;
                     boolean cas = unsafe.compareAndSwapInt(this, offset, state, toState);
-                    if (cas) {
-                        System.out.println("CAS 竞争成功: " + toState);
-                    } else {
+                    if (!cas) {
                         System.out.println("CAS 竞争失败，等待重试!");
+                        continue;
                     }
+
+                    System.out.println("CAS 竞争成功: " + toState);
 
                     TimeUnit.MILLISECONDS.sleep(500);
                 }
