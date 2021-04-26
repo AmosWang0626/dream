@@ -1,5 +1,29 @@
 # Java并发编程
 
+## 三大问题
+
+#### 1. 原子性
+
+Java底层保证赋值写操作是原子性的，复杂的不能保证
+
+#### 2. 可见性
+
+MESI协议，flush、refresh，配合起来，解决可见性问题
+
+#### 3. 有序性
+
+- 编译阶段，javac、JIT
+- 现代处理器提升性能，指令乱序和猜测执行机制
+- 高速缓存和写缓冲器内存重排序乱序（LoadLoad,StoreStore,LoadStore,StoreLoad）
+
+## synchronized
+
+- 原子性：同一段代码只能一个执行。
+- 可见性：同步代码块，写操作释放锁时，强制flush；读操作时，强制refresh。
+- 有序性：通过各种内存屏障，来解决LoadLoad等等重排序。
+
+## volatile
+
 ## 主要涉及内容
 
 - synchronized
