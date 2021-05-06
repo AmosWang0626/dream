@@ -82,6 +82,10 @@ class Test {
 1. 原子性
     - 类似AQS的加锁方案
     - ![C++ ObjectMonitor](synchronized_detail.png)
+    - http://hg.openjdk.java.net/jdk8u/jdk8u/hotspot/file/8a152c8e9f14/src/share/vm/runtime/objectMonitor.hpp
+    - _WaitSet（进入synchronized同步代码块后，执行wait操作，进入_WaitSet，后续通过notify/notifyAll唤醒）
+    - _EntryList（等待进入同步代码块）
+    - _recursions（可重入标示）/_owner（当前线程）
 2. 可见性
     - 如上代码注释，通过Load和Store内存屏障保证可见性
 3. 有序性
@@ -90,4 +94,3 @@ class Test {
 
 ### volatile
 
-待续。。。
