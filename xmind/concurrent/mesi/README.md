@@ -1,45 +1,18 @@
-# 高速缓存
+# MESI协议（缓存一致性）
 
-## 高速缓存的数据结构
+- S：Share 共享的
+- I：Invalid 无效的
+- E：Exclusive 独占的
+- M：Modified 已修改
 
-> 拉链散列表，缓存条目，地址解码
+Cache Entry（tag, cache line, flag）
 
-- 高速缓存
-    - bucket
-        - cache entry
-            - tag（缓存数据在主内存中的数据地址）
-            - cache line（缓存的数据，可以包含多个变量的值）
-            - flag（缓存行状态）
-        - cache entry
-            - tag
-            - cache line
-            - flag
-        - cache entry
-            - tag
-            - cache line
-            - flag
-    - bucket
-        - cache entry
-            - tag
-            - cache line
-            - flag
-        - cache entry
-            - tag
-            - cache line
-            - flag
-        - cache entry
-            - tag
-            - cache line
-            - flag
+1. 处理器0读取变量，高速缓存里没有，就向总线发送消息，总线从主内存或者其他处理器的高速缓存中读取到该变量，
+返回给处理器0，处理器0将变量放到 Cache Entry 里边，此时，flag = S
+2. 同时处理器1也读取了这个变量，同样 flag = S
+3. 处理器0要修改了该变量，就向总线发送invalidate消息，尝试让其他处理器将对应Cache Entry全部变成 I
+4. 处理器1嗅探到invalidate消息，将自己的Cache Entry设置为 I，并返回invalidate ack消息到总线
+5. 处理器0嗅探到所有处理器都返回invalidate ack消息了，就将自己的Cache Entry先设置为 E，独占这条消息
+6. 如果有别的同时来修改，并发送invalidate，这个处理器0是不会返回invalidate ack消息的
+7. 接着，处理器0开始修改这条数据，并设置 flag = M，也有可能把数据强制写会主内存，具体看硬件实现
 
-### 处理器中会操作一些变量，怎么在高速缓存里定位这个变量呢？
-
-处理器在读写高速缓存的时候，实际上会根据变量名执行内存地址解码，会解析出来三个东西，index、tag和offset。
-
-- index（定位Bucket）
-- tag（定位Cache Entry）
-- offset（定位Cache Line中的位置）
-
-### 多级缓存
-
-一级、二级、三级缓存，越靠近CPU读写效率越高
