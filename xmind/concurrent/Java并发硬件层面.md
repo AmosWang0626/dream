@@ -94,3 +94,27 @@ class Test {
 
 ### volatile
 
+```java
+volatile boolean isRunning = true;
+
+线程1:
+// Load 内存屏障，refresh
+while(isRunning) {
+    // Acquire 内存屏障（避免重排-读～读写）
+    // some logic
+}
+
+线程2:
+// Release 内存屏障（避免重排-写～读写）
+isRunning = false;
+// Store 内存屏障，flush
+```
+
+1. 原子性
+    - 仅32位虚拟机下，给long/double类型加上volatile可以保证原子性
+2. 可见性
+    - Load和Store两个内存屏障
+3. 有序性
+    - Acquire和Release两个内存屏障。
+    - Acquire内存屏障：也就是 LoadLoad + LoadStore
+    - Release内存屏障：也就是 StoreLoad + StoreStore
