@@ -70,11 +70,11 @@ class Test {
             // Acquire 内存屏障（禁止读操作和读写操作发生指令重排）
 
             int c = a;
-            // Store 内存屏障（flush，将变量值刷新到高速缓存或主内存中）
             b = 1;
 
             // Release 内存屏障（禁止写操作和读写操作发生指令重排）
         } // monitor_exit
+       // Store 内存屏障（flush，将变量值刷新到高速缓存或主内存中）
     }
 }
 ```
