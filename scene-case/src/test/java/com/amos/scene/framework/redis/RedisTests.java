@@ -20,8 +20,6 @@ class RedisTests {
     void contextLoads() throws InterruptedException {
         AtomicInteger count = new AtomicInteger();
 
-        redisLock.clearLock(LOCK_KEY);
-
         Runnable runnable = () -> {
             for (int i = 0; i < 1000; i++) {
                 String lockVal = redisLock.lock(LOCK_KEY, 1000, 1000);

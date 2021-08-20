@@ -9,13 +9,6 @@ package com.amos.scene.facade;
 public interface ILock {
 
     /**
-     * 初始化锁 (防止遗留锁未释放, 影响效果)
-     *
-     * @param key key
-     */
-    void clearLock(String key);
-
-    /**
      * 获取锁
      *
      * @param key     key

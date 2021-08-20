@@ -23,14 +23,6 @@ public class RedisLock implements ILock {
     private JedisPool jedisPool;
 
     @Override
-    public void clearLock(String key) {
-        try (Jedis client = jedisPool.getResource()) {
-            client.del(key);
-        }
-        System.out.println("初始化锁完成 >>>>> go go go");
-    }
-
-    @Override
     public String lock(String key, int timeout, int expire) {
         try (Jedis client = jedisPool.getResource()) {
             String value = UUID.randomUUID().toString();
