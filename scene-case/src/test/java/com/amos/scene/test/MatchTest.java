@@ -18,44 +18,57 @@ public class MatchTest {
      */
 
     /**
-     * 耗时: 9550
+     * 耗时: 7025
      */
     @Test
     public void hello() {
         long startTime = System.currentTimeMillis();
+        String str = String.valueOf(Long.MAX_VALUE);
         for (int i = 0; i < 100000000; i++) {
-            "123456".matches("[+0-9]");
+            str.matches("[+0-9]");
         }
         System.out.println("123456".matches("[0-9]+"));
         System.out.println("耗时: " + (System.currentTimeMillis() - startTime));
     }
 
     /**
-     * 耗时: 2874
+     * 耗时: 4807
      */
     @Test
     public void hello2() {
         long startTime = System.currentTimeMillis();
+        String str = String.valueOf(Long.MAX_VALUE);
         Pattern number = Pattern.compile("[0-9]+");
         for (int i = 0; i < 100000000; i++) {
-            number.matcher("123456").matches();
+            number.matcher(str).matches();
         }
-        System.out.println(number.matcher("123456").matches());
+        System.out.println(number.matcher(str).matches());
         System.out.println("耗时: " + (System.currentTimeMillis() - startTime));
     }
 
     /**
-     * 耗时: 2874
+     * 耗时: 2234 性能最佳！
      */
     @Test
     public void hello3() {
         long startTime = System.currentTimeMillis();
-        Pattern number = Pattern.compile("[0-9]+");
+        String str = String.valueOf(Long.MAX_VALUE);
         for (int i = 0; i < 100000000; i++) {
-            number.matcher("123456").matches();
+            isNumber(str);
         }
-        System.out.println(number.matcher("123456").matches());
+        System.out.println(isNumber(str));
         System.out.println("耗时: " + (System.currentTimeMillis() - startTime));
     }
 
+    private boolean isNumber(String str) {
+        if (str == null || str.length() == 0) {
+            return false;
+        }
+        for (int i = 0, len = str.length(); i < len; i++) {
+            if (!Character.isDigit(str.charAt(i))) {
+                return false;
+            }
+        }
+        return true;
+    }
 }
