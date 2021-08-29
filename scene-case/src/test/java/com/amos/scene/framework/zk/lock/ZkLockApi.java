@@ -1,5 +1,7 @@
 package com.amos.scene.framework.zk.lock;
 
+import org.apache.zookeeper.KeeperException;
+
 /**
  * Zookeeper Lock api
  *
@@ -8,8 +10,8 @@ package com.amos.scene.framework.zk.lock;
  */
 public interface ZkLockApi {
 
-    boolean lock(String key);
+    void lock() throws InterruptedException, KeeperException;
 
-    void invalidate(String key);
+    void unlock() throws InterruptedException, KeeperException;
 
 }
