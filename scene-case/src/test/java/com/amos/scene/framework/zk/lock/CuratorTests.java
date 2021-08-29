@@ -1,4 +1,4 @@
-package com.amos.scene.framework.zk;
+package com.amos.scene.framework.zk.lock;
 
 import org.apache.curator.framework.CuratorFramework;
 import org.apache.curator.framework.CuratorFrameworkFactory;
@@ -13,7 +13,7 @@ import java.util.concurrent.TimeUnit;
  *
  * @author wangdaoyuan
  */
-public class ZkTests {
+public class CuratorTests {
 
     private static final String ZK_LOCK_PATH = "/zk/lock";
 
