@@ -43,11 +43,7 @@ class RedisTests {
         thread3.start();
         thread4.start();
 
-
-        thread1.join();
-        thread2.join();
-        thread3.join();
-        thread4.join();
+        Thread.sleep(20000);
 
         System.out.println(">>>>>>>>>>>>>>>> Count: " + count.get());
     }

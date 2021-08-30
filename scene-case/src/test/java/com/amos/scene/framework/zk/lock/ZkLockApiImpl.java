@@ -1,10 +1,7 @@
 package com.amos.scene.framework.zk.lock;
 
 import com.amos.scene.framework.zk.base.ZkUtils;
-import org.apache.zookeeper.CreateMode;
-import org.apache.zookeeper.KeeperException;
-import org.apache.zookeeper.Watcher;
-import org.apache.zookeeper.ZooKeeper;
+import org.apache.zookeeper.*;
 
 import java.io.IOException;
 import java.util.Collections;
@@ -17,11 +14,11 @@ import java.util.concurrent.CountDownLatch;
  * @author <a href="mailto:daoyuan0626@gmail.com">amos.wang</a>
  * @date 2021/8/29
  */
-public class ZkLockApiImpl implements ZkLockApi {
+public class ZkLockApiImpl implements ZkLockApi, Watcher {
 
-    private static final String CONN_ZK_URL = "127.0.0.1:2181";
+    private static final String CONNECT_ZK_URL = "127.0.0.1:2181";
     private static final int SESSION_TIMEOUT = 50 * 1000;
-    private static final String BASE_LOCK_PATH = "/zk_base";
+    private static final String ROOT_PATH = "/zk_lock_root";
 
     /**
      * 这里的成员变量不要定义成 static 的，会影响逻辑执行
@@ -30,23 +27,12 @@ public class ZkLockApiImpl implements ZkLockApi {
     private String waitedPrePath = null;
     private final ZooKeeper zookeeper;
     private final CountDownLatch waitLatch = new CountDownLatch(1);
+    private final CountDownLatch connectLatch = new CountDownLatch(1);
 
 
     private ZkLockApiImpl() throws IOException, InterruptedException, KeeperException {
-        zookeeper = new ZooKeeper(CONN_ZK_URL, SESSION_TIMEOUT, event -> {
-            // 监听节点删除，并且是前一个节点被删除
-            if (Watcher.Event.EventType.NodeDeleted.equals(event.getType())
-                    && event.getPath().equals(waitedPrePath)) {
-                // 释放阻塞等待
-                waitLatch.countDown();
-            }
-        });
-
-        // 初始化基础路径
-        try {
-            ZkUtils.create(zookeeper, BASE_LOCK_PATH, CreateMode.PERSISTENT);
-        } catch (Exception ignore) {
-        }
+        zookeeper = new ZooKeeper(CONNECT_ZK_URL, SESSION_TIMEOUT, this);
+        connectLatch.await();
     }
 
     public static ZkLockApi getInstance() {
@@ -61,12 +47,34 @@ public class ZkLockApiImpl implements ZkLockApi {
     }
 
     @Override
+    public void process(WatchedEvent event) {
+        if (!Event.KeeperState.SyncConnected.equals(event.getState())) {
+            return;
+        }
+        if (Event.EventType.None.equals(event.getType())) {
+            // 释放阻塞等待
+            connectLatch.countDown();
+            try {
+                ZkUtils.create(zookeeper, ROOT_PATH, CreateMode.PERSISTENT);
+            } catch (Exception ignore) {
+            }
+        } else if (Event.EventType.NodeDeleted.equals(event.getType())) {
+            // 监听节点删除，并且是前一个节点被删除
+            if (event.getPath().equals(waitedPrePath)) {
+                waitLatch.countDown();
+            }
+        }
+    }
+
+    @Override
     public void lock() throws InterruptedException, KeeperException {
         // 创建临时有序节点
-        final String zkLockPath = BASE_LOCK_PATH + "/scene_lock_";
+        final String zkLockPath = ROOT_PATH + "/scene_lock_";
         currentPath = ZkUtils.create(zookeeper, zkLockPath, CreateMode.EPHEMERAL_SEQUENTIAL);
 
-        List<String> childrenList = zookeeper.getChildren(BASE_LOCK_PATH, false);
+        System.out.println(Thread.currentThread().getName() + " >>>>>> 创建临时节点 " + currentPath);
+
+        List<String> childrenList = zookeeper.getChildren(ROOT_PATH, false);
         if (childrenList.size() == 1) {
             return;
         }
@@ -74,7 +82,7 @@ public class ZkLockApiImpl implements ZkLockApi {
         Collections.sort(childrenList);
 
         // 当前节点路径
-        String currentNodePath = currentPath.replace(BASE_LOCK_PATH + "/", "");
+        String currentNodePath = currentPath.replace(ROOT_PATH + "/", "");
         // 当前节点在队列中的位置
         int currentNodeIndex = childrenList.indexOf(currentNodePath);
         if (currentNodeIndex == -1) {
@@ -87,8 +95,8 @@ public class ZkLockApiImpl implements ZkLockApi {
         }
 
         // 监听前一个节点释放
-        waitedPrePath = BASE_LOCK_PATH + "/" + childrenList.get(currentNodeIndex - 1);
-        zookeeper.getData(waitedPrePath, true, null);
+        waitedPrePath = ROOT_PATH + "/" + childrenList.get(currentNodeIndex - 1);
+        zookeeper.exists(waitedPrePath, true);
 
         // 开始阻塞等待
         waitLatch.await();
