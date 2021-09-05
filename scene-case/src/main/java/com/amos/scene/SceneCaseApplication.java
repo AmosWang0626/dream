@@ -7,7 +7,7 @@ import org.springframework.kafka.annotation.EnableKafka;
 /**
  * @author amoswang
  */
-@EnableKafka
+//@EnableKafka
 @SpringBootApplication
 public class SceneCaseApplication {
 

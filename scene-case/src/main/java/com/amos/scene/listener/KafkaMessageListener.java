@@ -11,7 +11,7 @@ import org.springframework.stereotype.Component;
  * @author <a href="mailto:daoyuan0626@gmail.com">amos.wang</a>
  * @date 2021/7/31
  */
-@Component
+//@Component
 public class KafkaMessageListener {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(KafkaMessageListener.class);
