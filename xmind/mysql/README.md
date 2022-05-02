@@ -249,3 +249,7 @@ where id = 1
 ## 幂等性
 
 `INSERT INTO ... ON DUPLICATE KEY UPDATE` 语法，不存在时插⼊，存在时更新，是天然⽀持幂等性的。
+
+`REPLACE INTO ...` 如果唯一键存在就更新。
+
+`INSERT IGNORE INTO ...` 如果唯一键存在就不插入，也可以解决并发插入的问题。
